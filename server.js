@@ -54,20 +54,26 @@ app.post('/api/send', upload.single('file'), async (req, res) => {
     console.log(`Using Profile: ${profile.name} (${profile.email})`);
 
     // 3. Create Transporter for selected profile
+    // 3. Create Transporter for selected profile
     const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        host: 'smtp.gmail.com', // Explicitly define host
-        port: 465,              // Explicitly use the SSL port (more reliable in cloud)
-        secure: true,           // true for 465, false for other ports
+        host: 'smtp.gmail.com',
+        port: 587,              // CHANGE: Switch to STARTTLS port
+        secure: false,          // CHANGE: Must be false for port 587
         auth: {
             user: profile.user,
             pass: profile.pass,
         },
-        // --- THE CRITICAL FIXES ---
         tls: {
-            rejectUnauthorized: false // Helps avoid some strict SSL certificate issues
+            rejectUnauthorized: false
         },
-        family: 4 // <--- THIS IS KEY: Forces Node to use IPv4 instead of IPv6
+        family: 4,              // KEEP: Force IPv4
+        
+        // --- NEW DEBUG SETTINGS ---
+        logger: true,           // Print detailed logs to Render console
+        debug: true,            // Include payload details in logs
+        connectionTimeout: 10000, // Wait 10 seconds for connection
+        greetingTimeout: 5000,    // Wait 5 seconds for Gmail to say "Hello"
+        socketTimeout: 10000      // Kill idle sockets
     });
 
     const results = [];
