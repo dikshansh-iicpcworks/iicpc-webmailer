@@ -56,10 +56,18 @@ app.post('/api/send', upload.single('file'), async (req, res) => {
     // 3. Create Transporter for selected profile
     const transporter = nodemailer.createTransport({
         service: 'gmail',
+        host: 'smtp.gmail.com', // Explicitly define host
+        port: 465,              // Explicitly use the SSL port (more reliable in cloud)
+        secure: true,           // true for 465, false for other ports
         auth: {
             user: profile.user,
             pass: profile.pass,
-        }
+        },
+        // --- THE CRITICAL FIXES ---
+        tls: {
+            rejectUnauthorized: false // Helps avoid some strict SSL certificate issues
+        },
+        family: 4 // <--- THIS IS KEY: Forces Node to use IPv4 instead of IPv6
     });
 
     const results = [];
